@@ -4,40 +4,11 @@ import me.alex_s168.multiplatform.collection.Node
 import me.alex_s168.multiplatform.collection.Stream
 import me.alex_s168.sfl.ast.ASTNode
 import me.alex_s168.sfl.ast.ASTType
-import me.alex_s168.sfl.ast.ASTRef
 import me.alex_s168.sfl.error.ErrorContext
 import me.alex_s168.sfl.error.error
 import me.alex_s168.sfl.lexer.Token
 import me.alex_s168.sfl.lexer.TokenType
 import me.alex_s168.sfl.location.tTo
-
-fun parseRef(
-    stream: Stream<Token>,
-    err: ErrorContext
-): Node<ASTRef>? {
-    val next = stream.consume()
-        ?: return null
-    return when (next.type) {
-        TokenType.IDENTIFIER -> {
-            var expectSep = true
-            val tks = mutableListOf(next)
-            tks += stream.consumeWhile {
-                if (expectSep) {
-                    expectSep = false
-                    it.type == TokenType.DOT || it.type == TokenType.NAMESPACE
-                } else {
-                    expectSep = true
-                    it.type == TokenType.IDENTIFIER
-                }
-            }
-            if (!expectSep) {
-                err.error("Unexpected token (or missing identifier)", tks.last().location)
-            }
-            Node(ASTRef(tks, tks.first().location tTo tks.last().location))
-        }
-        else -> null
-    }
-}
 
 fun parseType(
     stream: Stream<Token>,
@@ -55,12 +26,12 @@ fun parseType(
             Node(ASTType(true, false, next.location))
         }
         TokenType.IDENTIFIER -> {
-            val ident = parseRef(stream, err)!! as Node<ASTNode>
+            val ident = parseRef(stream, err)!!
             val next2 = stream.peek()
-                ?: return Node<ASTNode>(ASTType(false, false,
-                    ident.children.first().value!!.loc tTo
-                            ident.children.last().value!!.loc
-                ), mutableListOf(ident)) as Node<ASTType>
+                ?: return Node(ASTType(false, false,
+                    ident.value!!.parts.first().location tTo
+                            ident.value!!.parts.last().location
+                ), mutableListOf(ident as Node<ASTNode>)) as Node<ASTType>
             if (next2.type == TokenType.ANGLE_OPEN) {
                 var level = 0
                 val tokens: MutableList<MutableList<Token>> =
@@ -71,11 +42,13 @@ fun parseType(
                         ?: break
                     if (next3.type == TokenType.ANGLE_OPEN) {
                         level++
+                        continue
                     } else if (next3.type == TokenType.ANGLE_CLOSE) {
                         level--
                         if (level < 0) {
                             break
                         }
+                        continue
                     } else if (next3.type == TokenType.COMMA && level == 0) {
                         tokens.add(mutableListOf())
                         continue
@@ -85,8 +58,11 @@ fun parseType(
                 if (level != 0) {
                     err.error("Missing closing angle bracket", next2.location)
                 }
-                val types = mutableListOf(ident)
-                tokens.mapTo(types) {
+                val types = mutableListOf(ident as Node<ASTNode>)
+                tokens.mapNotNullTo(types) {
+                    if (it.isEmpty()) {
+                        return@mapNotNullTo null
+                    }
                     parseType(Stream(it.asReversed()), err)!! as Node<ASTNode>
                 }
                 Node(ASTType(false, false,
@@ -95,9 +71,9 @@ fun parseType(
                 ), types) as Node<ASTType>
             }
             Node(ASTType(false, false,
-                ident.children.first().value!!.loc tTo
-                        ident.children.last().value!!.loc
-            ), mutableListOf(ident)) as Node<ASTType>
+                ident.value!!.parts.first().location tTo
+                        ident.value!!.parts.last().location
+            ), mutableListOf(ident as Node<ASTNode>)) as Node<ASTType>
         }
         else -> {
             err.error("Unexpected token! Expected type", next.location)

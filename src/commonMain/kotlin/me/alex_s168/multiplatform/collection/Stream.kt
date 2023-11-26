@@ -45,24 +45,37 @@ class Stream<T>(
 
     fun consumeUntil(predicate: (T) -> Boolean): List<T> {
         val result = mutableListOf<T>()
-        while (!done && list.isNotEmpty() && !predicate(list.last())) {
-            result.add(list.removeLast())
+        while (true) {
+            val x = consume()
+                ?: break
+            result += x
+            if (predicate(x)) {
+                break
+            }
         }
         return result
     }
 
     fun consumeWhile(predicate: (T) -> Boolean): List<T> {
         val result = mutableListOf<T>()
-        while (!done && list.isNotEmpty() && predicate(list.last())) {
-            result.add(list.removeLast())
+        while (true) {
+            val x = peek()
+                ?: break
+            if (!predicate(x)) {
+                break
+            }
+            consume()
+            result += x
         }
         return result
     }
 
     fun consumeAll(): List<T> {
         val result = mutableListOf<T>()
-        while (!done && list.isNotEmpty()) {
-            result.add(list.removeLast())
+        while (true) {
+            val x = consume()
+                ?: break
+            result += x
         }
         return result
     }

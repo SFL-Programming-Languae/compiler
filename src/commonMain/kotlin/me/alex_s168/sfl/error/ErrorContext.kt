@@ -4,6 +4,9 @@ import me.alex_s168.sfl.location.TokenLocation
 
 class ErrorContext {
     val errors = mutableListOf<Error>()
+
+    override fun toString(): String =
+        "ErrorContext(errors=$errors)"
 }
 
 fun ErrorContext.hasErrors(
