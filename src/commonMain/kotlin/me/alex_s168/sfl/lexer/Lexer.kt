@@ -1,5 +1,6 @@
 package me.alex_s168.sfl.lexer
 
+import me.alex_s168.multiplatform.collection.Stream
 import me.alex_s168.sfl.error.ErrorContext
 import me.alex_s168.sfl.error.error
 import me.alex_s168.sfl.location.SourceLocation
@@ -21,6 +22,7 @@ private val simpleTokens = listOf(
     ";" to TokenType.SEMICOLON,
     "!" to TokenType.EXCLAMATION,
     "~" to TokenType.WAVE,
+    "_" to TokenType.UNDERSCORE,
 
     "=" to TokenType.ASSIGN,
     "+=" to TokenType.INC_ASSIGN,
@@ -108,10 +110,10 @@ private fun getLineAndColumn(source: String, offset: Int): Pair<Int, Int> {
 fun lex(
     sourceLocation: SourceLocation,
     errors: ErrorContext,
-    offset: Int = 0
-): List<Token> {
+    offset: Int = 0,
+    tokens: Stream<Token> = Stream(mutableListOf())
+): Stream<Token> {
     val source = sourceLocation.source
-    val tokens = mutableListOf<Token>()
     var index = offset
     while (index < source.length) {
         val char = source[index]

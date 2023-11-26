@@ -16,6 +16,7 @@ enum class TokenType {
     SEMICOLON, // ';'
     EXCLAMATION, // '!' (also used for boolean not)
     WAVE, // '~'
+    UNDERSCORE, // '_'
 
     ASSIGN, // '='
     INC_ASSIGN, // '+='

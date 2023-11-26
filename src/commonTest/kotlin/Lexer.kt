@@ -18,9 +18,10 @@ fun testLexer0() {
         fileAbsPath = "testLexer0"
     )
     val tokens = lex(loc, errors)
+    tokens.setDone()
     assertEquals(false, errors.hasErrors())
     println("Tokens:")
-    for (token in tokens) {
+    for (token in tokens.reversed()) {
         println(token)
     }
     println("===")
