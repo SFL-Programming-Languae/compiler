@@ -1,8 +1,6 @@
 package me.alex_s168.sfl.parser
 
-import me.alex_s168.multiplatform.collection.Node
 import me.alex_s168.multiplatform.collection.Stream
-import me.alex_s168.sfl.ast.ASTNode
 import me.alex_s168.sfl.error.ErrorContext
 import me.alex_s168.sfl.lexer.Token
 import me.alex_s168.sfl.lexer.TokenType
@@ -10,10 +8,12 @@ import me.alex_s168.sfl.lexer.TokenType
 /**
  * Expects the opening parenthesis to be consumed already.
  */
-fun parseParents(
+fun <T> parseParents(
     stream: Stream<Token>,
-    err: ErrorContext
-): List<Node<ASTNode>>? {
+    err: ErrorContext,
+    commasep: Boolean,
+    proc: (MutableList<Token>) -> T?
+): List<T>? {
     val tokens = mutableListOf<MutableList<Token>>()
     var depth = 1
     val current = mutableListOf<Token>()
@@ -31,6 +31,11 @@ fun parseParents(
                 tokens.add(current)
                 break
             }
+        } else if (commasep && depth == 1 && next.type == TokenType.COMMA) {
+            stream.consume()
+            tokens.add(current)
+            current.clear()
+            continue
         }
 
         current.add(next)
@@ -41,7 +46,6 @@ fun parseParents(
         if (it.isEmpty()) {
             return@mapNotNull null
         }
-        parseExpr(Stream(it).setDone(), err)
-            ?: return null
+        proc(it)
     }
 }

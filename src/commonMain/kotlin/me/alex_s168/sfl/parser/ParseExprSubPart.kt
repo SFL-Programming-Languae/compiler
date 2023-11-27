@@ -6,6 +6,7 @@ import me.alex_s168.sfl.ast.ASTFunCall
 import me.alex_s168.sfl.ast.ASTNode
 import me.alex_s168.sfl.ast.lit.*
 import me.alex_s168.sfl.error.ErrorContext
+import me.alex_s168.sfl.error.error
 import me.alex_s168.sfl.lexer.Token
 import me.alex_s168.sfl.lexer.TokenType
 import me.alex_s168.sfl.location.tTo
@@ -42,7 +43,9 @@ fun parseExprSubPart(
             if (next2.type == TokenType.PAREN_OPEN) {
                 stream.consume()
                 val children = mutableListOf(ref as Node<ASTNode>)
-                val args = parseParents(stream, err)
+                val args = parseParents(stream, err, commasep = true) {
+                    parseExpr(Stream(it).setDone(), err)
+                }
                     ?: return null
                 children.addAll(args as MutableList<Node<ASTNode>>)
                 
@@ -99,11 +102,29 @@ fun parseExprSubPart(
         TokenType.WAVE -> {
             Node(ASTErrHandlerSpecialIgnore(next.location))
         }
-        // TODO: anonymous functions
-        // examples:   () { aa; }
-        //             (a) { return a + 1; }
-        //             { aa; }
-        // TODO: parenthesized expressions
+        TokenType.PAREN_OPEN -> {
+            stream.consume()
+            val tokens = parseParents(stream, err, commasep = false ) { it }
+
+            if (tokens == null) {
+                err.error("Expected expression", next.location)
+                return null
+            }
+
+            return if (stream.peek()?.type == TokenType.BRACE_OPEN) {
+                // anonymous function
+                // examples:   () { aa; }
+                //             (a) { return a + 1; }
+                TODO()
+            } else {
+                parseExpr(Stream(tokens.first()).setDone(), err)
+                    ?: return null
+            }
+        }
+        TokenType.BRACE_OPEN -> {
+            // anonymous function with no arguments
+            TODO()
+        }
         else -> null
     }
 }
