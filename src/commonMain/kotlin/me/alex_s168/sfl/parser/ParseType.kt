@@ -33,7 +33,7 @@ fun parseType(
                             ident.value!!.parts.last().location
                 ), mutableListOf(ident as Node<ASTNode>)) as Node<ASTType>
             if (next2.type == TokenType.ANGLE_OPEN) {
-                var level = 0
+                var level = 1
                 val tokens: MutableList<MutableList<Token>> =
                     mutableListOf(mutableListOf())
                 stream.consume()
@@ -45,7 +45,7 @@ fun parseType(
                         continue
                     } else if (next3.type == TokenType.ANGLE_CLOSE) {
                         level--
-                        if (level < 0) {
+                        if (level == 0) {
                             break
                         }
                         continue
@@ -63,9 +63,9 @@ fun parseType(
                     if (it.isEmpty()) {
                         return@mapNotNullTo null
                     }
-                    parseType(Stream(it.asReversed()), err)!! as Node<ASTNode>
+                    parseType(Stream(it.asReversed()).setDone(), err) as Node<ASTNode>?
                 }
-                Node(ASTType(false, false,
+                return Node(ASTType(false, false,
                     types.first().value!!.loc tTo
                             types.last().value!!.loc
                 ), types) as Node<ASTType>

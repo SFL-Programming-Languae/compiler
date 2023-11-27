@@ -20,8 +20,9 @@ class Stream<T>(
     var done: Boolean = false
         private set
 
-    fun setDone() {
+    fun setDone(): Stream<T> {
         done = true
+        return this
     }
 
     fun add(item: T) {
@@ -43,25 +44,26 @@ class Stream<T>(
         }
     }
 
-    fun consumeUntil(predicate: (T) -> Boolean): List<T> {
-        val result = mutableListOf<T>()
-        while (true) {
-            val x = consume()
-                ?: break
-            result += x
-            if (predicate(x)) {
-                break
-            }
-        }
-        return result
-    }
-
     fun consumeWhile(predicate: (T) -> Boolean): List<T> {
         val result = mutableListOf<T>()
         while (true) {
             val x = peek()
                 ?: break
             if (!predicate(x)) {
+                break
+            }
+            consume()
+            result += x
+        }
+        return result
+    }
+
+    fun consumeUntil(predicate: (T) -> Boolean): List<T> {
+        val result = mutableListOf<T>()
+        while (true) {
+            val x = peek()
+                ?: break
+            if (predicate(x)) {
                 break
             }
             consume()
