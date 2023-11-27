@@ -8,5 +8,5 @@ class ASTType(
     loc: TokenLocation,
 ): ASTNode("type", loc) {
     override fun toString(): String =
-        "ASTType(infer=$infer, loc=$loc)"
+        "ASTType(infer=$infer, mutable=$mutable, loc=$loc)"
 }
