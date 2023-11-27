@@ -95,5 +95,18 @@ class Stream<T>(
 
     fun hasNext(): Boolean =
         !done || list.isNotEmpty()
+
+    class StreamBackup<T> internal constructor(
+        private val stream: Stream<T>,
+        private val list: MutableList<T>
+    ) {
+        fun restore() {
+            stream.list.clear()
+            stream.list.addAll(list)
+        }
+    }
+
+    fun backup(): StreamBackup<T> =
+        StreamBackup(this, list.toMutableList())
     
 }

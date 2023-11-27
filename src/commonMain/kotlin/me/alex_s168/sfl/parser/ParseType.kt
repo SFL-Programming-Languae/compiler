@@ -33,39 +33,11 @@ fun parseType(
                             ident.value!!.parts.last().location
                 ), mutableListOf(ident as Node<ASTNode>)) as Node<ASTType>
             if (next2.type == TokenType.ANGLE_OPEN) {
-                var level = 1
-                val tokens: MutableList<MutableList<Token>> =
-                    mutableListOf(mutableListOf())
                 stream.consume()
-                while (true) {
-                    val next3 = stream.consume()
-                        ?: break
-                    if (next3.type == TokenType.ANGLE_OPEN) {
-                        level++
-                        tokens.last().add(next3)
-                        continue
-                    } else if (next3.type == TokenType.ANGLE_CLOSE) {
-                        level--
-                        if (level == 0) {
-                            break
-                        }
-                        tokens.last().add(next3)
-                        continue
-                    } else if (next3.type == TokenType.COMMA && level == 1) {
-                        tokens.add(mutableListOf())
-                        continue
-                    }
-                    tokens.last().add(next3)
-                }
-                if (level != 0) {
-                    err.error("Missing closing angle bracket", next2.location)
-                }
                 val types = mutableListOf(ident as Node<ASTNode>)
-                tokens.mapNotNullTo(types) {
-                    if (it.isEmpty()) {
-                        return@mapNotNullTo null
-                    }
-                    parseType(Stream(it.asReversed()).setDone(), err) as Node<ASTNode>?
+                val types2 = parseAngleBrackets(stream, err)
+                types2?.forEach {
+                    types += it as Node<ASTNode>
                 }
                 return Node(ASTType(false, false,
                     types.first().value!!.loc tTo
