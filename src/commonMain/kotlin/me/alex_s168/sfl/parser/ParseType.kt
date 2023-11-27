@@ -42,14 +42,16 @@ fun parseType(
                         ?: break
                     if (next3.type == TokenType.ANGLE_OPEN) {
                         level++
+                        tokens.last().add(next3)
                         continue
                     } else if (next3.type == TokenType.ANGLE_CLOSE) {
                         level--
                         if (level == 0) {
                             break
                         }
+                        tokens.last().add(next3)
                         continue
-                    } else if (next3.type == TokenType.COMMA && level == 0) {
+                    } else if (next3.type == TokenType.COMMA && level == 1) {
                         tokens.add(mutableListOf())
                         continue
                     }

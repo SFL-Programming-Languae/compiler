@@ -35,7 +35,7 @@ fun testParser0() {
 @Test
 fun testParser1() {
     val source = """
-        mut std::collections::Vec<Yo>
+        mut std::collections::Vec<Aa, Bb<Cc>>
     """.trimIndent()
     val errors = ErrorContext()
     val loc = SourceLocation(
