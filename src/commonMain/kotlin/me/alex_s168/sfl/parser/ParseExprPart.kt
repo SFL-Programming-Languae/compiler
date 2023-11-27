@@ -4,6 +4,7 @@ import me.alex_s168.multiplatform.collection.Node
 import me.alex_s168.multiplatform.collection.Stream
 import me.alex_s168.sfl.ast.ASTFunCall
 import me.alex_s168.sfl.ast.ASTNode
+import me.alex_s168.sfl.ast.lit.*
 import me.alex_s168.sfl.error.ErrorContext
 import me.alex_s168.sfl.lexer.Token
 import me.alex_s168.sfl.lexer.TokenType
@@ -52,7 +53,34 @@ fun parseExprPart(
                 ref as Node<ASTNode>
             }
         }
-        // TODO: literals
+        TokenType.LIT_BOOL_FALSE -> {
+            stream.consume()
+            Node(ASTBool(false, next.location))
+        }
+        TokenType.LIT_BOOL_TRUE -> {
+            stream.consume()
+            Node(ASTBool(true, next.location))
+        }
+        TokenType.LIT_CHAR -> {
+            stream.consume()
+            Node(ASTChar(next.value!!.first(), next.location))
+        }
+        TokenType.LIT_STRING -> {
+            stream.consume()
+            Node(ASTString(next.value!!, next.location))
+        }
+        TokenType.LIT_NONE -> {
+            stream.consume()
+            Node(ASTOptionalNone(next.location))
+        }
+        TokenType.LIT_INT -> {
+            stream.consume()
+            Node(ASTInt(next.value!!.toLong(), next.location))
+        }
+        TokenType.LIT_FLOAT -> {
+            stream.consume()
+            Node(ASTFloat(next.value!!.toDouble(), next.location))
+        }
         else -> null
     }
 }
