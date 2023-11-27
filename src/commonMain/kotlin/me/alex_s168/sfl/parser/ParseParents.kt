@@ -37,7 +37,10 @@ fun parseParents(
         stream.consume()
     }
 
-    return tokens.map {
+    return tokens.mapNotNull {
+        if (it.isEmpty()) {
+            return@mapNotNull null
+        }
         parseExpr(Stream(it).setDone(), err)
             ?: return null
     }

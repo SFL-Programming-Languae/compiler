@@ -2,6 +2,7 @@ import me.alex_s168.sfl.error.ErrorContext
 import me.alex_s168.sfl.error.hasErrors
 import me.alex_s168.sfl.lexer.lex
 import me.alex_s168.sfl.location.SourceLocation
+import me.alex_s168.sfl.parser.parseExprPart
 import me.alex_s168.sfl.parser.parseType
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -9,9 +10,9 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @Test
-fun testParser1() {
+fun testParser2()  {
     val source = """
-        mut std::collections::Vec<Aa, Bb<Cc>>
+        aa<b, c<d>>()
     """.trimIndent()
     val errors = ErrorContext()
     val loc = SourceLocation(
@@ -26,7 +27,7 @@ fun testParser1() {
     }
     println("===")
     assertEquals(false, errors.hasErrors(), errors.toString())
-    val ast = parseType(tokens, errors)
+    val ast = parseExprPart(tokens, errors)
     assertEquals(false, errors.hasErrors(), errors.toString())
     assertNotNull(ast)
     println("AST:")

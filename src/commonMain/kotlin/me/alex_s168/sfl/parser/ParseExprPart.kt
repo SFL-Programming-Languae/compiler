@@ -24,7 +24,7 @@ fun parseExprPart(
 
             var next2 = stream.peek()
                 ?: return ref as Node<ASTNode>
-
+            
             if (next2.type == TokenType.ANGLE_OPEN) {
                 val backup = stream.backup()
                 stream.consume()
