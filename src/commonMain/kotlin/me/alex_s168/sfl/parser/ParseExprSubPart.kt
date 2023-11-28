@@ -3,6 +3,7 @@ package me.alex_s168.sfl.parser
 import me.alex_s168.multiplatform.collection.Node
 import me.alex_s168.multiplatform.collection.Stream
 import me.alex_s168.sfl.ast.ASTFunCall
+import me.alex_s168.sfl.ast.ASTNewObj
 import me.alex_s168.sfl.ast.ASTNode
 import me.alex_s168.sfl.ast.lit.*
 import me.alex_s168.sfl.error.ErrorContext
@@ -19,6 +20,19 @@ fun parseExprSubPart(
         ?: return null
 
     return when (next.type) {
+        TokenType.KW_NEW -> {
+            stream.consume()
+            val mut = (stream.peek()!!.type == TokenType.KW_MUT)
+            if (mut) {
+                stream.consume()
+            }
+            val constr = (parseExprSubPart(stream, err)
+                ?: return null) as? Node<ASTFunCall> ?: return null
+            Node(
+                ASTNewObj(mut, next.location tTo constr.value!!.loc) as ASTNode,
+                mutableListOf(constr as Node<ASTNode>)
+            )
+        }
         TokenType.IDENTIFIER -> {
             val ref = parseRef(stream, err)
                 ?: return null
